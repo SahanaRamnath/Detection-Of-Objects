@@ -59,19 +59,22 @@ int main(int argc,char** argv)
      //set up SVM's parameters and train it
      cout<<"Putting Parameters.."<<endl;   
      Ptr<SVM> svm=SVM::create();
-     svm->setCoef0(0.0);
-     svm->setDegree(3);
-     svm->setGamma(0);
-     svm->setType(SVM::EPS_SVR);
+     svm->setType(SVM::C_SVC);
+     //svm->setCoef0(0.0);
+     //svm->setDegree(3);
+     //svm->setGamma(0);
+     //svm->setType(SVM::EPS_SVR);
      svm->setKernel(SVM::LINEAR);
-     TermCriteria criteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS,1000,1e-3);
+     //TermCriteria criteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS,1000,1e-3);
+     TermCriteria criteria(TermCriteria::MAX_ITER,10000,1e-6);
      svm->setTermCriteria(criteria);
-     svm->setNu(0.5);
-     svm->setP(0.1);
-     svm->setC(0.01);
+     //svm->setNu(0.5);
+     //svm->setP(0.1);
+     //svm->setC(0.01);
 
      cout<<"SVM Training.."<<endl;
      svm->train(PNDescriptor,ROW_SAMPLE,labels);
+     //svm->train(PNDescriptor,ROW_SAMPLE,labels);
      //const Ptr<TrainData> svmresult=TrainData::create(PNDescriptor,ROW_SAMPLE,labels);
      //svm->trainAuto(svmresult);
      //Ptr<StatModel> svmstat;
