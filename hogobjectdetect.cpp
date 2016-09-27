@@ -1,4 +1,8 @@
 //detect objects using a SVM trained using hog features from positive and negative images of concerned objects
+
+#include "types.hpp"
+#include "opencv2/core.hpp"
+#include "opencv2/imgproc.hpp"
 #include <stdio.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -22,7 +26,7 @@ using namespace std;
 
 int help();
 void svmdetector(Ptr<SVM>& svm,vector< float >& hogdetector);
-void drawlocations(Mat& draw,const vector< Rect >& objectlocations);
+void drawlocations(Mat& draw,const vector< Rect >& objectlocations,const vector< Point >& foundpoints);
 
 int main(int argc,char** argv)
 {
@@ -33,11 +37,13 @@ int main(int argc,char** argv)
      int esc=27;
      Mat img,grayimg,draw;
      vector< Rect > objectlocations;
+     vector< Point > foundpoints;
      string trainedsvmname=argv[1];
 
      cout<<"Loading trained SVM file.."<<endl;
      //Load trained SVM xml file
      Ptr<SVM> svm=SVM::load(argv[1]);
+     //Ptr<SVM> svm=StatModel::load<SVM>(argv[1]);
      //Ptr<SVM> svm;
      //svm=StatModel::load<SVM>(argv[1]);
      //svm->load(argv[1]);
@@ -56,6 +62,8 @@ int main(int argc,char** argv)
      svmdetector(svm,hogdetector);
      cout<<"Back to main.."<<endl;
      hog.setSVMDetector(hogdetector);
+     cout<<"Size of hogdetector after 'setSVMDetector' : "<<sizeof(hogdetector)<<endl;
+     cout<<"Size of hog after 'setSVMDetector' : "<<sizeof(hog)<<endl;
      cout<<"Option is : "<<option<<endl;
 
      if((option!=1)&&(option!=2))
@@ -108,9 +116,22 @@ int main(int argc,char** argv)
           objectlocations.clear();
 
           cout<<"Calling detectMultiScale.."<<endl;
-          hog.detectMultiScale(img,objectlocations,0.0,Size(4,4),Size(),1.01,0.1);
+          cout<<"Size of objectlocations before calling hog.detectMultiScale"<<objectlocations.size()<<endl;
+          cout<<"Size of hog before detectMultiScale : "<<sizeof(hog)<<endl;
+          hog.detectMultiScale(img,objectlocations,0.0,Size(16,16),Size(16,16),1.05,0.1);
+          //hog.detectMultiScale(img,objectlocations,0.0,Size(4,4),Size(),1.01,0.1);
+
+          //hog.detectMultiScale(img,objectlocations);
+          hog.detect(img,foundpoints);
+          cout<<"Size of Point after hog.detect : "<<sizeof(Point)<<endl;
+          //cout<<"Size of hog before detectMultiScale : "<<sizeof(hog)<<endl;
+          //cout<<objectlocations.size()<<endl;
+          cout<<"Size of objectlocations after calling hog.detectMultiScale"<<objectlocations.size()<<endl;
+
+          //cout<<foundpoints[0]->x<<'\t'<<foundpoints[0]->y<<endl;
+
           cout<<"Calling drawlocations.."<<endl;
-          drawlocations(draw,objectlocations);
+          drawlocations(draw,objectlocations,foundpoints);
 
           //objectlocations.clear();
           
@@ -137,7 +158,7 @@ void svmdetector(Ptr<SVM>& svm,vector< float >& hogdetector)
     //getting support vectors
      Mat sv=svm->getSupportVectors();
      int svtot=sv.rows;
-     cout<<endl<<svtot<<endl;
+     cout<<endl<<"Number of rows and columns respectively in SVM :"<<svtot<<'\t'<<sv.cols<<endl;
      Mat alpha,svidx;
      double rho=svm->getDecisionFunction(0,alpha,svidx);
 
@@ -149,25 +170,48 @@ void svmdetector(Ptr<SVM>& svm,vector< float >& hogdetector)
      hogdetector.resize(sv.cols+1);
      memcpy(&hogdetector[0], sv.ptr(),sv.cols*sizeof(hogdetector[0]));
      hogdetector[sv.cols]=(float)-rho;
+     cout<<"Size of hogdetector : "<<sizeof(hogdetector)<<endl;
 }
 
-void drawlocations(Mat& draw,const vector< Rect >& objectlocations)
+void drawlocations(Mat& draw,const vector< Rect >& objectlocations,const vector< Point >& foundpoints)
 {
-     if(objectlocations.empty()) exit(0);
+     cout<<"Inside draw function.."<<endl;
+     //if(objectlocations.empty()) exit(0);
 
      cout<<"Inside draw function.."<<endl;
      imshow("In draw function",draw);
 
      vector< Rect >::const_iterator start   =  objectlocations.begin();
      vector< Rect >::const_iterator end     =  objectlocations.end();
-
+     int i;
      for( ; start!=end ; start++)
           rectangle(draw,*start,Scalar(0,255,0),2);
      cout<<objectlocations.size();
+     RotatedRect box = minAreaRect(Mat(foundpoints));
+     Point2f vtx[4];
+     box.points(vtx);
+     for( i = 0; i < 4; i++ )
+          line(draw, vtx[i], vtx[(i+1)%4], Scalar(0, 0, 0), 6, LINE_AA);
+
+
+
+
+
+
+
+
+     //line(draw,*foundpoints,*(foundpoints+1),Scalar(0,0,0),2,8);
+     /*for(int i=1; i<foundpoints.size() ; i++)
+     {
+          line(draw,foundpoints[i-1],foundpoints[i],Scalar(0,0,0),2,8);
+     }*/
      /*for(int i=0;i<objectlocations.size();i++)
           rectangle(draw,objectlocations[i],Scalar(0,255,0),5);*/
      //cvtColor(draw,draw,CV_GRAY2BGR);
-     resize(draw,draw,Size(400,400));
+     //RotatedRect located=fitEllipse(foundpoints);     
+     //ellipse(draw, located, Scalar(0,0,0),1,LINE_AA);
+     //ellipse(draw,located.center,located.size*0.5f,located.angle,0,360,Scalar(0,0,0),1,LINE_AA);
+     //resize(draw,draw,Size(400,400));
      imshow("Detectedfirst",draw);
 
 }
