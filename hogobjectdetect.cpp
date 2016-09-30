@@ -26,7 +26,7 @@ using namespace std;
 
 int help();
 void svmdetector(Ptr<SVM>& svm,vector< float >& hogdetector);
-void drawlocations(Mat& draw,const vector< Rect >& objectlocations,const vector< Point >& foundpoints);
+void drawlocations(Mat& draw,const vector< Rect >& objectlocations);//,const vector< Point >& foundpoints);
 
 int main(int argc,char** argv)
 {
@@ -118,12 +118,14 @@ int main(int argc,char** argv)
           cout<<"Calling detectMultiScale.."<<endl;
           cout<<"Size of objectlocations before calling hog.detectMultiScale"<<objectlocations.size()<<endl;
           cout<<"Size of hog before detectMultiScale : "<<sizeof(hog)<<endl;
-          hog.detectMultiScale(img,objectlocations,0.0,Size(16,16),Size(16,16),1.05,0.1);
+          hog.detectMultiScale(img,objectlocations,0.0,Size(9,9),Size(5,5),1.01,0.1);//(9,9),(5,5)
+          //second-last parameter 'scale' makes virtually no difference in the detection
+          //third parameter 'hit-threshold'" " " "
           //hog.detectMultiScale(img,objectlocations,0.0,Size(4,4),Size(),1.01,0.1);
 
           //hog.detectMultiScale(img,objectlocations);
-          hog.detect(img,foundpoints);
-          cout<<"Size of Point after hog.detect : "<<sizeof(Point)<<endl;
+          //hog.detect(img,foundpoints);
+          //cout<<"Size of Point after hog.detect : "<<sizeof(Point)<<endl;
           //cout<<"Size of hog before detectMultiScale : "<<sizeof(hog)<<endl;
           //cout<<objectlocations.size()<<endl;
           cout<<"Size of objectlocations after calling hog.detectMultiScale"<<objectlocations.size()<<endl;
@@ -131,7 +133,7 @@ int main(int argc,char** argv)
           //cout<<foundpoints[0]->x<<'\t'<<foundpoints[0]->y<<endl;
 
           cout<<"Calling drawlocations.."<<endl;
-          drawlocations(draw,objectlocations,foundpoints);
+          drawlocations(draw,objectlocations);//,foundpoints);
 
           //objectlocations.clear();
           
@@ -173,31 +175,27 @@ void svmdetector(Ptr<SVM>& svm,vector< float >& hogdetector)
      cout<<"Size of hogdetector : "<<sizeof(hogdetector)<<endl;
 }
 
-void drawlocations(Mat& draw,const vector< Rect >& objectlocations,const vector< Point >& foundpoints)
+void drawlocations(Mat& draw,const vector< Rect >& objectlocations)//,const vector< Point >& foundpoints)
 {
      cout<<"Inside draw function.."<<endl;
-     //if(objectlocations.empty()) exit(0);
+     if(objectlocations.empty()) exit(0);
 
      cout<<"Inside draw function.."<<endl;
      imshow("In draw function",draw);
+ 
+     RNG rng(12345);
 
      vector< Rect >::const_iterator start   =  objectlocations.begin();
      vector< Rect >::const_iterator end     =  objectlocations.end();
      int i;
      for( ; start!=end ; start++)
-          rectangle(draw,*start,Scalar(0,255,0),2);
+          rectangle(draw,*start,Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) ),1);
      cout<<objectlocations.size();
-     RotatedRect box = minAreaRect(Mat(foundpoints));
+     /*RotatedRect box = minAreaRect(Mat(foundpoints));
      Point2f vtx[4];
      box.points(vtx);
      for( i = 0; i < 4; i++ )
-          line(draw, vtx[i], vtx[(i+1)%4], Scalar(0, 0, 0), 6, LINE_AA);
-
-
-
-
-
-
+          line(draw, vtx[i], vtx[(i+1)%4], Scalar(0, 0, 0), 6, LINE_AA);*/
 
 
      //line(draw,*foundpoints,*(foundpoints+1),Scalar(0,0,0),2,8);
