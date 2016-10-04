@@ -49,7 +49,8 @@ int main(int argc,char** argv)
      //svm->load(argv[1]);
      cout<<"Declaring HOG descriptor.."<<endl;
      HOGDescriptor hog(Size(64,48),Size(8,8),Size(4,4),Size(4,4),9);
-     hog.winSize=Size(64,48);
+     //hog.winSize=Size(16,12);
+     //HOGDescriptor hog(Size(32,24),Size(16,16),Size(8,8),Size(8,8),9);//note : winsize must be smaller than image size
      
      //setting trained SVM to hog
      //getting support vectors
@@ -61,6 +62,7 @@ int main(int argc,char** argv)
      vector < float >  hogdetector;
      svmdetector(svm,hogdetector);
      cout<<"Back to main.."<<endl;
+     cout<<"Size of hogdetector after coming back to main : "<<sizeof(hogdetector)<<endl;
      hog.setSVMDetector(hogdetector);
      cout<<"Size of hogdetector after 'setSVMDetector' : "<<sizeof(hogdetector)<<endl;
      cout<<"Size of hog after 'setSVMDetector' : "<<sizeof(hog)<<endl;
@@ -108,7 +110,7 @@ int main(int argc,char** argv)
           if(argc!=3)
           { cout<<"Type the path to the image as the third argument in the command line"<<endl; return -1; }
           img=imread(argv[2]); 
-          resize(img,img,Size(64,48));
+          resize(img,img,Size(64,48));//(128,96)
           //cvtColor(img,grayimg,CV_BGR2GRAY);
           imshow("Original",img);
           draw=img.clone();
@@ -118,7 +120,10 @@ int main(int argc,char** argv)
           cout<<"Calling detectMultiScale.."<<endl;
           cout<<"Size of objectlocations before calling hog.detectMultiScale"<<objectlocations.size()<<endl;
           cout<<"Size of hog before detectMultiScale : "<<sizeof(hog)<<endl;
-          hog.detectMultiScale(img,objectlocations,0.0,Size(9,9),Size(5,5),1.01,0.1);//(9,9),(5,5)
+          //cout<<"winStride before calling hog.detectMultiScale() : "<<hog.winStride<<endl; 
+          //hog.detectMultiScale(img,objectlocations,0.0,Size(16,16),Size(0,0),1.05,1.5);//(9,9),(5,5)
+          hog.detectMultiScale(img,objectlocations,0.0,Size(9,9),Size(5,5),1.05,0.1);//(9,9),(5,5)
+          //cout<<"winStride after calling hog.detectMultiScale() : "<<hog.winStride<<endl; 
           //second-last parameter 'scale' makes virtually no difference in the detection
           //third parameter 'hit-threshold'" " " "
           //hog.detectMultiScale(img,objectlocations,0.0,Size(4,4),Size(),1.01,0.1);
