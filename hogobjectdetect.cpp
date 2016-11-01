@@ -1,6 +1,6 @@
 //detect objects using a SVM trained using hog features from positive and negative images of concerned objects
 
-#include "types.hpp"
+//#include "types.hpp"
 #include "opencv2/core.hpp"
 #include "opencv2/imgproc.hpp"
 #include <stdio.h>
@@ -25,7 +25,9 @@ using namespace cv::ml;
 using namespace std;
 
 int help();
+
 void svmdetector(Ptr<SVM>& svm,vector< float >& hogdetector);
+
 void drawlocations(Mat& draw,const vector< Rect >& objectlocations);//,const vector< Point >& foundpoints);
 
 int main(int argc,char** argv)
@@ -43,29 +45,24 @@ int main(int argc,char** argv)
      cout<<"Loading trained SVM file.."<<endl;
      //Load trained SVM xml file
      Ptr<SVM> svm=SVM::load(argv[1]);
-     //Ptr<SVM> svm=StatModel::load<SVM>(argv[1]);
-     //Ptr<SVM> svm;
-     //svm=StatModel::load<SVM>(argv[1]);
-     //svm->load(argv[1]);
+
      cout<<"Declaring HOG descriptor.."<<endl;
      HOGDescriptor hog(Size(64,48),Size(8,8),Size(4,4),Size(4,4),9);
+     //HOGDescriptor hog(Size(64,128),Size(16,16),Size(8,8),Size(8,8),9);//note : winsize must be smaller than image size
      //hog.winSize=Size(16,12);
      //HOGDescriptor hog(Size(32,24),Size(16,16),Size(8,8),Size(8,8),9);//note : winsize must be smaller than image size
-     
-     //setting trained SVM to hog
-     //getting support vectors
-     //Mat sv=svm->getSupportVectors();
-     //int svtot=sv.rows;
-     //cout<<endl<<svtot<<endl;
 
      cout<<"Calling svmdetector.."<<endl;
      vector < float >  hogdetector;
      svmdetector(svm,hogdetector);
+
      cout<<"Back to main.."<<endl;
+
      cout<<"Size of hogdetector after coming back to main : "<<sizeof(hogdetector)<<endl;
      hog.setSVMDetector(hogdetector);
      cout<<"Size of hogdetector after 'setSVMDetector' : "<<sizeof(hogdetector)<<endl;
      cout<<"Size of hog after 'setSVMDetector' : "<<sizeof(hog)<<endl;
+
      cout<<"Option is : "<<option<<endl;
 
      if((option!=1)&&(option!=2))
@@ -106,23 +103,32 @@ int main(int argc,char** argv)
      if(option==1)
      {
           cout<<"Option is : "<<option<<endl;
+
           cout<<"argc : "<<argc<<endl;
+
           if(argc!=3)
-          { cout<<"Type the path to the image as the third argument in the command line"<<endl; return -1; }
+          { 
+           cout<<"Type the path to the image as the third argument in the command line"<<endl; 
+           return -1; 
+          }
+
           img=imread(argv[2]); 
-          resize(img,img,Size(64,48));//(128,96)
-          //cvtColor(img,grayimg,CV_BGR2GRAY);
+          resize(img,img,Size(128,96));//(128,96)
           imshow("Original",img);
+
           draw=img.clone();
           cout<<"Cloned image.."<<endl;
+
           objectlocations.clear();
 
           cout<<"Calling detectMultiScale.."<<endl;
+
           cout<<"Size of objectlocations before calling hog.detectMultiScale"<<objectlocations.size()<<endl;
+
           cout<<"Size of hog before detectMultiScale : "<<sizeof(hog)<<endl;
-          //cout<<"winStride before calling hog.detectMultiScale() : "<<hog.winStride<<endl; 
-          //hog.detectMultiScale(img,objectlocations,0.0,Size(16,16),Size(0,0),1.05,1.5);//(9,9),(5,5)
-          hog.detectMultiScale(img,objectlocations,0.0,Size(9,9),Size(5,5),1.05,0.1);//(9,9),(5,5)
+ 
+          hog.detectMultiScale(img,objectlocations,0.0,Size(9,9),Size(5,5),1.05,1.5);//(9,9),(5,5)
+          //hog.detectMultiScale(img,objectlocations,0.0,Size(9,9),Size(),1.05,2);//,true);//(9,9),(5,5)
           //cout<<"winStride after calling hog.detectMultiScale() : "<<hog.winStride<<endl; 
           //second-last parameter 'scale' makes virtually no difference in the detection
           //third parameter 'hit-threshold'" " " "
@@ -196,24 +202,10 @@ void drawlocations(Mat& draw,const vector< Rect >& objectlocations)//,const vect
      for( ; start!=end ; start++)
           rectangle(draw,*start,Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) ),1);
      cout<<objectlocations.size();
-     /*RotatedRect box = minAreaRect(Mat(foundpoints));
-     Point2f vtx[4];
-     box.points(vtx);
-     for( i = 0; i < 4; i++ )
-          line(draw, vtx[i], vtx[(i+1)%4], Scalar(0, 0, 0), 6, LINE_AA);*/
 
-
-     //line(draw,*foundpoints,*(foundpoints+1),Scalar(0,0,0),2,8);
-     /*for(int i=1; i<foundpoints.size() ; i++)
-     {
-          line(draw,foundpoints[i-1],foundpoints[i],Scalar(0,0,0),2,8);
-     }*/
      /*for(int i=0;i<objectlocations.size();i++)
           rectangle(draw,objectlocations[i],Scalar(0,255,0),5);*/
      //cvtColor(draw,draw,CV_GRAY2BGR);
-     //RotatedRect located=fitEllipse(foundpoints);     
-     //ellipse(draw, located, Scalar(0,0,0),1,LINE_AA);
-     //ellipse(draw,located.center,located.size*0.5f,located.angle,0,360,Scalar(0,0,0),1,LINE_AA);
      //resize(draw,draw,Size(400,400));
      imshow("Detectedfirst",draw);
 
