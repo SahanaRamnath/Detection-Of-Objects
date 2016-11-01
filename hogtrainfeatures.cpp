@@ -33,7 +33,7 @@ int main(int argc,char** argv)
      vector< vector <Point> > vec_locations;
 
      Mat image;
-     int i;
+     int i,currentimg=1;
 
      struct dirent *dir;
      d=opendir(argv[1]);
@@ -47,16 +47,29 @@ int main(int argc,char** argv)
            if(!image.empty())
            {
             cvtColor(image,image,CV_RGB2GRAY);
-            resize(image,image,Size(64,48));
+            
+            resize(image,image,Size(64,48));//(64,48)
+            
             //extract features
             //HOGDescriptor h(Size(32,16),Size(8,8),Size(4,4),Size(4,4),9);
             HOGDescriptor h(Size(64,48),Size(8,8),Size(4,4),Size(4,4),9);
+            //HOGDescriptor h(Size(32,24),Size(16,16),Size(8,8),Size(8,8),9);//note : winsize must be smaller than image size
+            //HOGDescriptor h(Size(64,128),Size(16,16),Size(8,8),Size(8,8),9);//note : winsize must be smaller than image size
+
             vector<float> descriptorvalues;
             vector<Point> locations;
-            h.compute(image,descriptorvalues,Size(0,0),Size(0,0),locations);
+
+            h.compute(image,descriptorvalues,Size(0,0),Size(0,0),locations);//winstride was Size(0,0) before
+
             vec_descriptorvalues.push_back(descriptorvalues);
-            vec_locations.push_back(locations);       
+
+            vec_locations.push_back(locations);
+
+            cout<<currentimg<<endl;       
            }
+
+           currentimg++;
+
            waitKey(0);
       }
       closedir(d);
@@ -67,9 +80,11 @@ int main(int argc,char** argv)
      int row=vec_descriptorvalues.size();
      int col=vec_descriptorvalues[0].size();
      Mat M(row,col,CV_32F);
+
      //save Mat to xml
      for(i=0;i<row;i++)
           memcpy(&(M.data[col*i*sizeof(float) ]),vec_descriptorvalues[i].data(),col*sizeof(float));
+
      //write xml
      write(hogxml,"DescriptorOfImages",M);
      hogxml.release();
