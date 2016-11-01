@@ -1,3 +1,4 @@
+//train SVM
 #include <stdio.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -71,32 +72,15 @@ int main(int argc,char** argv)
      svm->setNu(0.8);
      svm->setP(10);
      svm->setC(0.01);
-     //cout<<"svm->C : "<<svm->C<<endl;
-     //cout<<"svm->Nu : "<<svm->Nu<<endl;
-     //cout<<"svm->Coef0 : "<<svm->Coef0<<endl;
-     //cout<<"svm->Degree : "<<svm->Degree<<endl;
-     //cout<<"svm->Gamma : "<<svm->Gamma<<endl;
-     //cout<<"svm->P : "<<svm->P<<endl;
+
+     //train the SVM
      cout<<"SVM Training.."<<endl;
      svm->train(PNDescriptor,ROW_SAMPLE,labels);
-     //svm->train(PNDescriptor,ROW_SAMPLE,labels);
-     //const Ptr<TrainData> svmresult=TrainData::create(PNDescriptor,ROW_SAMPLE,labels);
-     //svm->trainAuto(svmresult);
-     //Ptr<StatModel> svmstat;
-     //bool svmbool=svmstat->StatModel::train(&svmresult,0);
-     //bool svmbool=svmstat->StatModel::train(PNDescriptor,ROW_SAMPLE,labels);
-     //cout<<svmbool; 
 
      //saving trained data
-     cout<<"Saving SVM xml now.."<<endl;
-     //FileStorage svmxml(argv[3],FileStorage::WRITE);
-     //svm->write(svmxml);
-     //svmxml.release();
-     //svmresult->save(argv[3]);
-     //svm->StatModel::save(argv[3]);
      svm->save(argv[3]);
      cout<<"Saved"<<endl;
-     //svm->release();
+
      return -1;
 }
 
