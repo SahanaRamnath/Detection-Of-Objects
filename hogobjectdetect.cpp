@@ -65,40 +65,89 @@ int main(int argc,char** argv)
 
      cout<<"Option is : "<<option<<endl;
 
-     if((option!=1)&&(option!=2))
+     if((option!=1)&&(option!=2)&&(option!=3))
      {
       cout<<"First if\tOption is : "<<option<<endl;
       exit(0);
      }
 
-     if(option==2){
-     cout<<"Option is : "<<option;//<<endl;
-     //starting webcam
-     cout<<endl<<"Starting webcam now.."<<endl;
-     VideoCapture vdo(0);
-     while(1)
+     if(option==3)
      {
-          bool imgread=vdo.read(img);
-          if(!imgread) 
-          {
-           cout<<"Cam not opening";
-           return -1;
+          cout<<"Option is : "<<option<<endl;
+
+          cout<<"argc : "<<argc<<endl;
+
+          if(argc!=3)
+          { 
+           cout<<"Type the path to the video as the third argument in the command line"<<endl; 
+           return -1; 
           }
-          imshow("LiveFeed",img);
+          cout<<"Opening video now.."<<endl;
+          VideoCapture vdo(argv[2]);
+          while(1)
+          {
+               bool imgread=vdo.read(img);
+               if(!imgread) 
+               {
+                cout<<"Video not opening";
+                return -1;
+               }
+               resize(img,img,Size(256,192));//(128,96)
+               //imshow("Original",img);
 
-          /*draw=img.clone();
-          objectlocations.clear();
+               draw=img.clone();
+               //cout<<"Cloned image.."<<endl;
 
-          hog.detectMultiScale(img,objectlocations);
-          drawlocations(draw,objectlocations);
+               objectlocations.clear();
 
-          objectlocations.clear();
-          
-          //show detected objects
-          imshow("Detected",draw);
-      */
-          if(waitKey(30)==esc) break;
-     }}
+               cout<<"Calling detectMultiScale.."<<endl;
+
+               cout<<"Size of objectlocations before calling hog.detectMultiScale"<<objectlocations.size()<<endl;
+
+               cout<<"Size of hog before detectMultiScale : "<<sizeof(hog)<<endl;
+ 
+               hog.detectMultiScale(img,objectlocations,0.0,Size(9,9),Size(5,5),1.05,1.5);//(9,9),(5,5)
+               
+               cout<<"Size of objectlocations after calling hog.detectMultiScale"<<objectlocations.size()<<endl;
+               cout<<"Calling drawlocations.."<<endl;
+               drawlocations(draw,objectlocations);//,foundpoints);
+           
+               //show detected objects
+               imshow("Detected",draw);
+               if(waitKey(30)==esc) break;          
+          }
+     }
+
+     if(option==2)
+     {
+      cout<<"Option is : "<<option;//<<endl;
+       //starting webcam
+      cout<<endl<<"Starting webcam now.."<<endl;
+      VideoCapture vdo(0);
+      while(1)
+      {
+           bool imgread=vdo.read(img);
+           if(!imgread) 
+           {
+            cout<<"Cam not opening";
+            return -1;
+           }
+           imshow("LiveFeed",img);
+ 
+           /*draw=img.clone();
+           objectlocations.clear();
+ 
+           hog.detectMultiScale(img,objectlocations);
+           drawlocations(draw,objectlocations);
+ 
+           objectlocations.clear();
+           
+           //show detected objects
+           imshow("Detected",draw);
+       */
+           if(waitKey(30)==esc) break;
+      }
+     }
 
      if(option==1)
      {
@@ -160,7 +209,7 @@ int main(int argc,char** argv)
 int help()
 {
      int option;
-     cout<<endl<<"Press 1 to detect object in an image and 2 to detect in a live feed using webcam : ";
+     cout<<endl<<"Press 1 to detect object in an image, 2 to detect in a live feed using webcam and 3 to detect in a video : ";
      cin>>option;
      return option;
 }
